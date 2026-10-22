@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IMPACT LAB | From Ideas to Tested Impact{% endblock %}</title>
+    <!-- Favicon & Meta -->
+    <meta name="description" content="IMPACT LAB — Universal problem-solving platform connecting real-world challenges with structured solutions, transparent feasibility scoring, and field-tested outcomes.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Impact Dashboard & MCDA Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="site-header">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="brand-logo" aria-label="IMPACT LAB Home">
+                <span class="brand-badge">IL</span>
+                <div class="brand-text">
+                    <span class="brand-name">IMPACT LAB</span>
+                    <span class="brand-tagline">FROM IDEAS TO TESTED IMPACT</span>
+                </div>
+            </a>
+
+            <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="{{ url_for('home') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="{{ url_for('problems_page') }}" class="nav-link {% if request.path.startswith('/problems') %}active{% endif %}">Explore Problems</a>
+                <a href="{{ url_for('submit_problem_page') }}" class="nav-link {% if request.path == '/submit' %}active{% endif %}">Submit Problem</a>
+                <a href="{{ url_for('discover_page') }}" class="nav-link {% if request.path == '/discover' %}active{% endif %}">Discover Solutions</a>
+                <a href="{{ url_for('evaluate_page') }}" class="nav-link {% if request.path == '/evaluate' %}active{% endif %}">Feasibility Evaluator</a>
+                <a href="{{ url_for('help_network_page') }}" class="nav-link {% if request.path.startswith('/help-network') %}active{% endif %}">Help Network</a>
+                <a href="{{ url_for('dashboard_page') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">Impact Dashboard</a>
+                <a href="{{ url_for('about_page') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Global Toast Alert Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Flash Messages Container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <div class="alert-icon">
+                {% if category == 'success' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                {% elif category == 'danger' or category == 'error' %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {% else %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {% endif %}
+              </div>
+              <span class="alert-message">{{ message }}</span>
+              <button type="button" class="close-alert" onclick="this.parentElement.remove();" aria-label="Close alert">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Main Content Area -->
+    <main class="site-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="brand-logo footer-logo">
+                    <span class="brand-badge">IL</span>
+                    <div class="brand-text">
+                        <span class="brand-name">IMPACT LAB</span>
+                        <span class="brand-tagline">From Ideas to Tested Impact</span>
+                    </div>
+                </div>
+                <p class="footer-description">
+                    A universal problem-solving platform connecting real-world problem owners with practical solvers, transparent Multi-Criteria Decision Analysis (MCDA), and measurable field-tested outcomes.
+                </p>
+                <div class="platform-meta-tags">
+                    <span class="meta-pill">INNOTECH Innovation Initiative</span>
+                    <span class="meta-pill">Open Knowledge Base</span>
+                    <span class="meta-pill">Python &amp; Flask &amp; SQLite</span>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <h4>Platform Navigation</h4>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Platform Overview</a></li>
+                    <li><a href="{{ url_for('problems_page') }}">Problem Explorer</a></li>
+                    <li><a href="{{ url_for('submit_problem_page') }}">Submit a Real Challenge</a></li>
+                    <li><a href="{{ url_for('discover_page') }}">NLP Solution Discovery</a></li>
+                    <li><a href="{{ url_for('evaluate_page') }}">MCDA Feasibility Evaluator</a></li>
+                    <li><a href="{{ url_for('dashboard_page') }}">Live Impact Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Supported Domains</h4>
+                <ul class="domain-footer-list">
+                    <li><span>• Technology &amp; Software</span></li>
+                    <li><span>• Engineering &amp; Innovation</span></li>
+                    <li><span>• College &amp; Student Life</span></li>
+                    <li><span>• Healthcare Accessibility</span></li>
+                    <li><span>• Environment &amp; Sustainability</span></li>
+                    <li><span>• Public Infrastructure &amp; Civic</span></li>
+                    <li><span>• Education &amp; Learning</span></li>
+                    <li><span>• Community &amp; Social Issues</span></li>
+                    <li><span>• Government &amp; Civic Services</span></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Community &amp; Governance</h4>
+                <ul>
+                    <li><a href="{{ url_for('help_network_page') }}">Community Help Network</a></li>
+                    <li><a href="{{ url_for('help_network_page') }}#registerHelper">Volunteer as a Solver</a></li>
+                    <li><a href="{{ url_for('about_page') }}">5-Step Problem Lifecycle</a></li>
+                    <li><a href="{{ url_for('about_page') }}#scoring-model">Mathematical Formulation</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="bottom-container">
+                <div class="copyright-text">
+                    &copy; 2026 IMPACT LAB &bull; Built for College-Level Innovation Competitions (INNOTECH)
+                </div>
+                <div class="footer-disclaimer">
+                    <strong>Algorithmic Notice:</strong> Feasibility scores and keyword matching results represent mathematical decision-support heuristics. Verified government portals (CPGRAMS, Swachhata, MyGov) are linked strictly for public reference without claiming official government affiliation.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Bundle -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

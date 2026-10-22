@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}NLP Solution Discovery Engine | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <span class="section-badge">Core Engine &bull; NLP Semantic Discovery</span>
+        <h1 class="page-title">Solution Discovery Engine</h1>
+        <p class="page-subtitle">
+            Powered by TF-IDF vector space modeling, morphological root extraction, and cosine similarity. Input any problem description or select a registered challenge to search across our structured solution database, engineering blueprints, and domain patterns.
+        </p>
+    </div>
+
+    <!-- Discovery Query Interface -->
+    <div class="discovery-query-card">
+        <form method="GET" action="{{ url_for('discover_page') }}" class="discovery-form" id="discoverForm">
+            <div class="query-mode-switch">
+                <label class="radio-label">
+                    <input type="radio" name="query_mode" value="custom" {% if custom_query or not selected_problem_id %}checked{% endif %} onchange="toggleQueryMode(this.value)">
+                    <span>Enter Natural Language Problem</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="query_mode" value="select" {% if selected_problem_id and not custom_query %}checked{% endif %} onchange="toggleQueryMode(this.value)">
+                    <span>Select Registered Challenge</span>
+                </label>
+            </div>
+
+            <!-- Custom Problem Text Input -->
+            <div id="customTextGroup" class="form-group" style="{% if selected_problem_id and not custom_query %}display: none;{% endif %}">
+                <label for="customQuery" class="form-label">Describe Your Problem in Natural Language</label>
+                <textarea 
+                    id="customQuery" 
+                    name="q" 
+                    class="form-textarea" 
+                    rows="3" 
+                    placeholder="e.g., Laptop damage caused by accidental impacts and workbench drops in engineering maker space labs..."
+                >{{ custom_query or '' }}</textarea>
+                <div class="form-hint">Our NLP engine will normalize your text, strip stopwords, extract weighted key terms, and calculate cosine similarity against stored solutions.</div>
+            </div>
+
+            <!-- Select Existing Problem -->
+            <div id="selectProblemGroup" class="form-group" style="{% if not (selected_problem_id and not custom_query) %}display: none;{% endif %}">
+                <label for="problemSelect" class="form-label">Choose a Registered Problem from SQLite</label>
+                <select id="problemSelect" name="problem_id" class="form-select">
+                    <option value="" disabled {% if not selected_problem_id %}selected{% endif %}>Select a problem from the registry...</option>
+                    {% for p in all_problems %}
+                    <option value="{{ p.id }}" {% if selected_problem_id == p.id %}selected{% endif %}>
+                        #{{ p.id }}: {{ p.title }} ({{ p.category }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Quick Example Chips for Live Demo Testing -->
+            <div class="sample-queries-wrap">
+                <span class="sample-label">Try Competition Scenarios:</span>
+                <button type="button" class="query-chip" onclick="applySampleQuery('laptop damage caused by accidental impacts in maker labs')">
+                    💻 Laptop Drop &amp; Impact Damage
+                </button>
+                <button type="button" class="query-chip" onclick="applySampleQuery('monsoon stormwater drain clogging and street waterlogging')">
+                    🌧️ Stormwater Drain Clogging
+                </button>
+                <button type="button" class="query-chip" onclick="applySampleQuery('rural clinic vaccine cold chain temperature breach storage')">
+                    💉 Vaccine Cold-Chain Telemetry
+                </button>
+                <button type="button" class="query-chip" onclick="applySampleQuery('cafeteria surplus food waste logistics and hunger donation')">
+                    🍲 Cafeteria Surplus Food Logistics
+                </button>
+            </div>
+
+            <div class="form-actions mt-3">
+                <button type="submit" class="btn btn-primary btn-lg" id="discoverSubmitBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Run Semantic Solution Discovery
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Query Context Banner -->
+    {% if query_text %}
+    <div class="query-context-banner">
+        <div class="context-details">
+            <span class="context-label">Current Analysis Target:</span>
+            <p class="context-text">"{{ query_text[:240] }}{% if query_text|length > 240 %}...{% endif %}"</p>
+            {% if extracted_keywords %}
+            <div class="extracted-keywords-wrap">
+                <span class="kw-label">Extracted Key Terms (TF-IDF):</span>
+                {% for kw in extracted_keywords %}
+                <span class="keyword-pill">{{ kw }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Discovery Results -->
+    {% if has_searched %}
+    <div class="section-divider">
+        <h2>Ranked Solution Matches &amp; Recommendations ({{ ranked_results|length }})</h2>
+        <p>Ranked strictly by mathematical relevance (TF-IDF cosine similarity + keyword overlap + category alignment).</p>
+    </div>
+
+    {% if ranked_results %}
+    <div class="discovery-results-grid">
+        {% for match in ranked_results %}
+        <div class="match-card {% if match.relevance_score >= 70 %}high-match{% elif match.relevance_score >= 40 %}med-match{% else %}low-match{% endif %}">
+            <div class="match-score-header">
+                <div class="score-pill-wrap">
+                    <div class="relevance-circle">
+                        <span class="relevance-val">{{ match.relevance_score }}%</span>
+                        <span class="relevance-sub">Match</span>
+                    </div>
+                    <div>
+                        <span class="quality-badge quality-{{ match.match_quality|lower|replace(' ', '-') }}">
+                            {{ match.match_quality }}
+                        </span>
+                        {% if match.category %}
+                        <span class="category-pill">{{ match.category }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="source-tag">
+                    Algorithmic Recommendation
+                </div>
+            </div>
+
+            <h3 class="match-title">{{ match.title }}</h3>
+            <p class="match-desc">{{ match.description }}</p>
+
+            <!-- Explanation & Matched Keywords Box -->
+            <div class="match-rationale">
+                <div class="rationale-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <strong>Why this solution matches:</strong>
+                </div>
+                <p>{{ match.explanation }}</p>
+                {% if match.matched_keywords %}
+                <div class="matched-kw-list">
+                    <span>Key Term Overlap:</span>
+                    {% for mkw in match.matched_keywords %}
+                    <span class="badge badge-outline">{{ mkw }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="match-specs">
+                <div class="spec-cell">
+                    <span class="s-label">Complexity</span>
+                    <span class="s-val">{{ match.difficulty or 'Moderate' }}</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="s-label">Cost Fit</span>
+                    <span class="s-val">{{ match.estimated_cost or 'Low' }}</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="s-label">Deployment</span>
+                    <span class="s-val">{{ match.time_weeks or 3 }} weeks</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="s-label">Expected Benefit</span>
+                    <span class="s-val">{{ match.expected_benefit or 'Proven process efficiency' }}</span>
+                </div>
+            </div>
+
+            <div class="match-actions">
+                <a href="{{ url_for('evaluate_page') }}?title={{ match.title|urlencode }}&problem_id={{ match.problem_id }}" class="btn btn-primary btn-sm">
+                    Evaluate Feasibility Score (MCDA) &rarr;
+                </a>
+                {% if match.problem_id %}
+                <a href="{{ url_for('problem_details_page', problem_id=match.problem_id) }}" class="btn btn-outline btn-sm">
+                    View Origin Problem (#{{ match.problem_id }})
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Direct Match State -->
+    <div class="empty-state">
+        <div class="empty-icon">🔎</div>
+        <h3>No direct database solution match found</h3>
+        <p>Our cosine similarity engine found no direct database proposals matching these specific keywords with sufficient confidence. Below are curated engineering blueprints and domain templates tailored to this challenge domain.</p>
+    </div>
+    {% endif %}
+
+    <!-- Curated Knowledge Base Blueprints (Fallback / Suggestions) -->
+    {% if curated_suggestions %}
+    <div class="section-divider mt-5">
+        <h2>Curated Domain Blueprints &amp; Heuristic Patterns</h2>
+        <p class="section-subtitle">
+            Algorithmic patterns from the IMPACT LAB Knowledge Base matched to your problem domain.
+        </p>
+    </div>
+
+    <div class="curated-grid">
+        {% for cs in curated_suggestions %}
+        <div class="curated-card">
+            <div class="curated-badge-wrap">
+                <span class="badge badge-info">{{ cs.source or 'Engineering Blueprint' }}</span>
+                <span class="badge badge-warning">Algorithmic Suggestion &bull; Not Verified Fact</span>
+            </div>
+            <h4>{{ cs.title }}</h4>
+            <p>{{ cs.description }}</p>
+
+            <div class="curated-breakdown">
+                <div><strong>Why it matches:</strong> {{ cs.why_matches }}</div>
+                <div><strong>Required Resources:</strong> {{ cs.required_resources }}</div>
+                <div><strong>Possible Limitations:</strong> {{ cs.possible_limitations }}</div>
+                <div><strong>Feasibility Assessment:</strong> {{ cs.feasibility_assessment }}</div>
+            </div>
+
+            <div class="curated-action">
+                <a href="{{ url_for('evaluate_page') }}?title={{ cs.title|urlencode }}" class="btn btn-outline btn-sm">
+                    Run MCDA Feasibility Calculation &rarr;
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleQueryMode(mode) {
+    const selectGroup = document.getElementById("selectProblemGroup");
+    const customGroup = document.getElementById("customTextGroup");
+    if (mode === "select") {
+        selectGroup.style.display = "block";
+        customGroup.style.display = "none";
+    } else {
+        selectGroup.style.display = "none";
+        customGroup.style.display = "block";
+    }
+}
+
+function applySampleQuery(text) {
+    document.querySelector('input[name="query_mode"][value="custom"]').checked = true;
+    toggleQueryMode('custom');
+    const textarea = document.getElementById("customQuery");
+    textarea.value = text;
+    document.getElementById("discoverForm").submit();
+}
+</script>
+{% endblock %}

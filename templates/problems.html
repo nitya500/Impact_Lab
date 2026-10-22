@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Problem Registry | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="dashboard-header">
+        <div class="header-text">
+            <span class="section-badge">Problem Registry &bull; Searchable Directory</span>
+            <h1 class="page-title">Explore Real-World Challenges</h1>
+            <p class="page-subtitle">
+                Browse challenges submitted by local communities, students, researchers, startups, and civic bodies. Filter by domain, search keywords, sort by urgency, or step in to propose an engineered solution.
+            </p>
+        </div>
+        <div class="header-action">
+            <a href="{{ url_for('submit_problem_page') }}" class="btn btn-primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Post New Challenge
+            </a>
+        </div>
+    </div>
+
+    <!-- Search, Filter & Sort Controls Bar -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('problems_page') }}" class="filter-form">
+            <div class="search-input-group">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ search_query or '' }}" 
+                    class="search-input" 
+                    placeholder="Search by keywords, title, or location..."
+                >
+            </div>
+
+            <div class="filter-select-group">
+                <!-- Category Domain Filter -->
+                <select name="category" class="filter-select" onchange="this.form.submit()">
+                    <option value="All" {% if selected_category == 'All' or not selected_category %}selected{% endif %}>All Domains</option>
+                    <option value="Technology &amp; Software Development" {% if selected_category == 'Technology & Software Development' %}selected{% endif %}>Technology &amp; Software</option>
+                    <option value="Engineering &amp; Innovation" {% if selected_category == 'Engineering & Innovation' %}selected{% endif %}>Engineering &amp; Hardware</option>
+                    <option value="College &amp; Student Life" {% if selected_category == 'College & Student Life' %}selected{% endif %}>College &amp; Student Life</option>
+                    <option value="Environment &amp; Sustainability" {% if selected_category == 'Environment & Sustainability' %}selected{% endif %}>Environment &amp; Energy</option>
+                    <option value="Public Infrastructure" {% if selected_category == 'Public Infrastructure' %}selected{% endif %}>Public Infrastructure &amp; Civic</option>
+                    <option value="Healthcare Accessibility" {% if selected_category == 'Healthcare Accessibility' %}selected{% endif %}>Healthcare &amp; Bio</option>
+                    <option value="Education &amp; Learning" {% if selected_category == 'Education & Learning' %}selected{% endif %}>Education &amp; Skilling</option>
+                    <option value="Community Problems" {% if selected_category == 'Community Problems' %}selected{% endif %}>Community Problems</option>
+                    <option value="Government &amp; Civic Services" {% if selected_category == 'Government & Civic Services' %}selected{% endif %}>Government &amp; Civic</option>
+                    <!-- Legacy filters for backward compatibility -->
+                    <option value="Technology &amp; Operations" {% if selected_category == 'Technology & Operations' %}selected{% endif %}>Technology &amp; Operations</option>
+                    <option value="Social &amp; Campus" {% if selected_category == 'Social & Campus' %}selected{% endif %}>Social &amp; Campus</option>
+                    <option value="Environmental" {% if selected_category == 'Environmental' %}selected{% endif %}>Environmental</option>
+                </select>
+
+                <!-- Status Filter -->
+                <select name="status" class="filter-select" onchange="this.form.submit()">
+                    <option value="All" {% if selected_status == 'All' or not selected_status %}selected{% endif %}>All Statuses</option>
+                    <option value="Open" {% if selected_status == 'Open' %}selected{% endif %}>Open for Solutions</option>
+                    <option value="In Progress" {% if selected_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Testing" {% if selected_status == 'Testing' %}selected{% endif %}>Active Field Testing</option>
+                    <option value="Resolved" {% if selected_status == 'Resolved' %}selected{% endif %}>Resolved / Validated</option>
+                </select>
+
+                <!-- Sorting Dropdown -->
+                <select name="sort" class="filter-select" onchange="this.form.submit()">
+                    <option value="newest" {% if selected_sort == 'newest' or not selected_sort %}selected{% endif %}>Sort: Newest First</option>
+                    <option value="severity" {% if selected_sort == 'severity' %}selected{% endif %}>Sort: Highest Priority / Severity</option>
+                    <option value="solutions" {% if selected_sort == 'solutions' %}selected{% endif %}>Sort: Most Solutions Proposed</option>
+                    <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Sort: Oldest First</option>
+                </select>
+
+                <button type="submit" class="btn btn-secondary">Filter</button>
+                {% if search_query or (selected_category and selected_category != 'All') or (selected_status and selected_status != 'All') or (selected_sort and selected_sort != 'newest') %}
+                <a href="{{ url_for('problems_page') }}" class="btn btn-outline" title="Clear all filters">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Filter Summary Bar -->
+    <div class="results-meta">
+        <span class="count-badge">Found <strong>{{ problems|length }}</strong> challenge{% if problems|length != 1 %}s{% endif %}</span>
+        {% if search_query %}
+            <span class="filter-tag">Search: "{{ search_query }}"</span>
+        {% endif %}
+        {% if selected_category and selected_category != 'All' %}
+            <span class="filter-tag">Domain: {{ selected_category }}</span>
+        {% endif %}
+        {% if selected_status and selected_status != 'All' %}
+            <span class="filter-tag">Status: {{ selected_status }}</span>
+        {% endif %}
+        {% if selected_sort and selected_sort != 'newest' %}
+            <span class="filter-tag">Sorted by: {{ selected_sort|capitalize }}</span>
+        {% endif %}
+    </div>
+
+    <!-- Problems List Grid -->
+    {% if problems %}
+    <div class="problems-grid">
+        {% for problem in problems %}
+        <div class="problem-card">
+            <div class="card-header">
+                <span class="category-pill">{{ problem.category }}</span>
+                <div class="badge-group">
+                    {% if problem.severity %}
+                    <span class="severity-badge severity-{{ problem.severity|lower }}">
+                        {{ problem.severity }}
+                    </span>
+                    {% endif %}
+                    <span class="status-badge status-{{ problem.status|lower|replace(' ', '-') }}">
+                        {{ problem.status }}
+                    </span>
+                </div>
+            </div>
+
+            <h3 class="card-title">
+                <a href="{{ url_for('problem_details_page', problem_id=problem.id) }}">
+                    {{ problem.title }}
+                </a>
+            </h3>
+
+            <p class="card-description">
+                {{ problem.description[:150] }}{% if problem.description|length > 150 %}...{% endif %}
+            </p>
+
+            {% if problem.keywords %}
+            <div class="card-tags">
+                {% for kw in problem.keywords.split(',')[:4] %}
+                <span class="keyword-tag">{{ kw.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="card-meta">
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ problem.user_type }}</span>
+                </div>
+                {% if problem.location %}
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ problem.location }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <div class="footer-left-stats">
+                    <span class="solution-count-tag">
+                        {{ problem.solution_count }} Solution{% if problem.solution_count != 1 %}s{% endif %}
+                    </span>
+                    {% if problem.latest_eval_score %}
+                    <span class="eval-score-tag">
+                        Score: <strong>{{ problem.latest_eval_score }}/100</strong>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions">
+                    <a href="{{ url_for('discover_page') }}?problem_id={{ problem.id }}" class="btn-icon-link" title="Discover matching solutions via NLP">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </a>
+                    <a href="{{ url_for('problem_details_page', problem_id=problem.id) }}" class="btn-card-action">
+                        View Details &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No challenges match the active filters</h3>
+        <p>Try clearing your keyword query or switching domain categories to view all registered challenges.</p>
+        <div class="mt-3">
+            <a href="{{ url_for('problems_page') }}" class="btn btn-secondary">Clear Filters</a>
+            <a href="{{ url_for('submit_problem_page') }}" class="btn btn-primary">Post a New Problem</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

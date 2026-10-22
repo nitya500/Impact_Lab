@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}IMPACT LAB — Every Problem Deserves a Solution{% endblock %}
+
+{% block content %}
+<!-- Professional Hero Section -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            <span>Universal Problem-Solving &amp; Innovation Registry</span>
+        </div>
+        
+        <h1 class="hero-title">
+            Every Problem Deserves a <span class="highlight-text">Solution.</span>
+        </h1>
+        
+        <p class="hero-subtitle">
+            IMPACT LAB is an end-to-end platform bridging real-world challenges and practical solutions. Submit operational, community, or engineering bottlenecks, discover proven blueprints via NLP semantic search, evaluate feasibility with transparent multi-criteria algorithms, and collaborate with skilled implementers.
+        </p>
+
+        <div class="hero-cta-group">
+            <a href="{{ url_for('submit_problem_page') }}" class="btn btn-primary btn-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Submit a Problem
+            </a>
+            <a href="{{ url_for('discover_page') }}" class="btn btn-secondary btn-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Explore Solutions
+            </a>
+            <a href="{{ url_for('dashboard_page') }}" class="btn btn-outline btn-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                Impact Dashboard
+            </a>
+        </div>
+
+        <div class="hero-trust">
+            <span class="trust-heading">Domain Agnostic:</span>
+            <span class="trust-tag">Technology &amp; Software</span>
+            <span class="trust-tag">Engineering &amp; Innovation</span>
+            <span class="trust-tag">College &amp; Student Life</span>
+            <span class="trust-tag">Environment &amp; Sustainability</span>
+            <span class="trust-tag">Public Infrastructure</span>
+            <span class="trust-tag">Healthcare Accessibility</span>
+            <span class="trust-tag">Education</span>
+            <span class="trust-tag">Civic &amp; Government</span>
+        </div>
+    </div>
+</section>
+
+<!-- Live Platform Statistics (Generated from Actual SQLite Data) -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon-wrapper teal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_problems }}</span>
+                <span class="stat-label">Problems Logged</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper navy">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_solutions }}</span>
+                <span class="stat-label">Solutions Available</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper emerald">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.tested_solutions }}</span>
+                <span class="stat-label">Field Tested Outcomes</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper amber">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.registered_helpers }}</span>
+                <span class="stat-label">Volunteer Solvers</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Workflows Section (Workflows A, B, C) -->
+<section class="workflows-section">
+    <div class="section-header">
+        <span class="section-badge">Structured Engagement</span>
+        <h2 class="section-title">Three Primary Workflows to Tested Impact</h2>
+        <p class="section-subtitle">
+            Whether you have an idea ready to evaluate, need a fresh solution, or are looking for hands-on implementers, IMPACT LAB has a dedicated path for you.
+        </p>
+    </div>
+
+    <div class="workflows-grid">
+        <!-- Workflow A -->
+        <div class="workflow-card">
+            <div class="workflow-tag tag-a">Workflow A</div>
+            <div class="workflow-icon-box">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h3 class="workflow-title">I Have a Problem &amp; a Solution Idea</h3>
+            <p class="workflow-desc">
+                Submit both your challenge and initial solution concept. Our transparent Multi-Criteria Decision Analysis (MCDA) calculates a feasibility score across 6 key operational dimensions plus risk factors.
+            </p>
+            <ul class="workflow-checklist">
+                <li>Instant algorithmic scoring (0-100)</li>
+                <li>Identifies positive drivers and execution bottlenecks</li>
+                <li>Provides actionable improvement recommendations</li>
+            </ul>
+            <div class="workflow-action">
+                <a href="{{ url_for('submit_problem_page') }}?workflow=A" class="btn btn-primary btn-block">
+                    Submit &amp; Evaluate Idea &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Workflow B -->
+        <div class="workflow-card highlight-card">
+            <div class="workflow-tag tag-b">Workflow B</div>
+            <div class="workflow-icon-box">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </div>
+            <h3 class="workflow-title">I Have a Problem but No Solution</h3>
+            <p class="workflow-desc">
+                Describe your challenge in natural language. Our NLP vector space engine normalizes your text, extracts meaningful terms, and recommends proven engineering and community blueprints.
+            </p>
+            <ul class="workflow-checklist">
+                <li>TF-IDF Vectorization and Cosine Similarity ranking</li>
+                <li>Transparent relevance percentages and keyword match overlap</li>
+                <li>Curated fallback patterns when no direct match exists</li>
+            </ul>
+            <div class="workflow-action">
+                <a href="{{ url_for('discover_page') }}" class="btn btn-teal btn-block">
+                    Discover Solutions &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Workflow C -->
+        <div class="workflow-card">
+            <div class="workflow-tag tag-c">Workflow C</div>
+            <div class="workflow-icon-box">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3 class="workflow-title">I Need Help Implementing a Solution</h3>
+            <p class="workflow-desc">
+                Stuck on execution? Publish a targeted help request for Python scripting, 3D CAD modeling, hardware sensor calibration, or community logistics to connect directly with volunteer solvers.
+            </p>
+            <ul class="workflow-checklist">
+                <li>Browse and post requests by specific technical skills</li>
+                <li>Verified solver directory of students and domain mentors</li>
+                <li>Track request lifecycle from Open to In Progress to Resolved</li>
+            </ul>
+            <div class="workflow-action">
+                <a href="{{ url_for('help_network_page') }}" class="btn btn-secondary btn-block">
+                    Join Help Network &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section (5-Step Lifecycle) -->
+<section class="how-it-works-section">
+    <div class="section-header">
+        <span class="section-badge">Methodology</span>
+        <h2 class="section-title">The 5-Step Problem-to-Impact Lifecycle</h2>
+        <p class="section-subtitle">
+            A rigorous, engineering-minded journey replacing guesswork with verified problem definition and field validation.
+        </p>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">01</div>
+            <h3>Define Challenge</h3>
+            <p>Structure the problem with target stakeholders, operational constraints, available resources, and quantitative success criteria.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-number">02</div>
+            <h3>NLP Analysis</h3>
+            <p>Tokenize and normalize text, eliminate stopwords, extract TF-IDF keywords, and detect civic or government portal relevance.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-number">03</div>
+            <h3>Match Solutions</h3>
+            <p>Search candidate solutions via cosine similarity, review explainable match rationales, or browse domain engineering blueprints.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-number">04</div>
+            <h3>MCDA Evaluation</h3>
+            <p>Score viability across 6 weighted dimensions (benefit, tech feasibility, cost, speed, resources, scalability) minus risk penalties.</p>
+        </div>
+
+        <div class="step-card highlight-step">
+            <div class="step-number">05</div>
+            <h3>Test &amp; Measure</h3>
+            <p>Run a localized pilot, record actual measured results in SQLite, and transparently document verified real-world impact.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Problems Registry Section -->
+<section class="featured-section">
+    <div class="section-header flex-header">
+        <div>
+            <span class="section-badge">Live Registry</span>
+            <h2 class="section-title">Featured Real-World Challenges</h2>
+        </div>
+        <a href="{{ url_for('problems_page') }}" class="btn btn-outline">
+            Browse All Problems ({{ stats.total_problems }}) &rarr;
+        </a>
+    </div>
+
+    <div class="problems-grid">
+        {% for problem in featured_problems %}
+        <div class="problem-card">
+            <div class="card-header">
+                <span class="category-pill">{{ problem.category }}</span>
+                <div class="badge-group">
+                    {% if problem.severity %}
+                    <span class="severity-badge severity-{{ problem.severity|lower }}">
+                        {{ problem.severity }} Priority
+                    </span>
+                    {% endif %}
+                    <span class="status-badge status-{{ problem.status|lower|replace(' ', '-') }}">
+                        {{ problem.status }}
+                    </span>
+                </div>
+            </div>
+
+            <h3 class="card-title">
+                <a href="{{ url_for('problem_details_page', problem_id=problem.id) }}">
+                    {{ problem.title }}
+                </a>
+            </h3>
+
+            <p class="card-description">
+                {{ problem.description[:140] }}{% if problem.description|length > 140 %}...{% endif %}
+            </p>
+
+            <div class="card-meta">
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ problem.user_type }}</span>
+                </div>
+                {% if problem.location %}
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ problem.location }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <div class="footer-left-stats">
+                    <span class="solution-count-tag">
+                        {{ problem.solution_count }} Solution{% if problem.solution_count != 1 %}s{% endif %}
+                    </span>
+                    {% if problem.latest_eval_score %}
+                    <span class="eval-score-tag">
+                        Score: <strong>{{ problem.latest_eval_score }}/100</strong>
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('discover_page') }}?problem_id={{ problem.id }}" class="btn-icon-link" title="Discover matching solutions">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </a>
+                    <a href="{{ url_for('problem_details_page', problem_id=problem.id) }}" class="btn-card-action">
+                        View Details &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="cta-banner-section">
+    <div class="cta-banner">
+        <h2>Have a problem or a solution ready for validation?</h2>
+        <p>Post your challenge to IMPACT LAB today. Run the NLP matching engine, evaluate feasibility scores, or join our community of active volunteer problem solvers.</p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('submit_problem_page') }}" class="btn btn-primary btn-lg">Submit a Problem</a>
+            <a href="{{ url_for('discover_page') }}" class="btn btn-outline btn-lg cta-btn-outline">Explore Solutions Engine</a>
+            <a href="{{ url_for('help_network_page') }}#registerHelper" class="btn btn-secondary btn-lg">Join as Volunteer Solver</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

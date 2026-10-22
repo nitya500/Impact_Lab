@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Community Help Network &amp; Solver Directory | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <span class="section-badge">Collaboration Network &bull; Problem &rarr; People</span>
+        <h1 class="page-title">Community Help Network</h1>
+        <p class="page-subtitle">
+            Great ideas need skilled implementers. Post targeted skill requests when facing execution bottlenecks, search for active engineering inquiries, or offer your technical expertise in software, CAD, electronics, or community logistics.
+        </p>
+    </div>
+
+    <!-- Quick Navigation Tabs -->
+    <div class="network-tabs-bar">
+        <button type="button" class="tab-btn active" id="tabBtnOpen" onclick="switchNetworkTab('openRequests', this)">
+            Browse Help Inquiries ({{ requests|length }})
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnPost" onclick="switchNetworkTab('postRequest', this)">
+            + Publish a Help Request
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnRoster" onclick="switchNetworkTab('helpersDirectory', this)">
+            Standing Solver Directory ({{ helpers|length }})
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnRegister" onclick="switchNetworkTab('registerHelper', this)">
+            Volunteer as a Solver
+        </button>
+    </div>
+
+    <!-- TAB 1: Open Help Requests with Search & Filter -->
+    <div id="tab-openRequests" class="tab-content active">
+        <!-- Search & Filter Controls -->
+        <div class="filter-bar mt-2 mb-4">
+            <form method="GET" action="{{ url_for('help_network_page') }}" class="filter-form">
+                <div class="search-input-group">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ search_query or '' }}" 
+                        class="search-input" 
+                        placeholder="Search requests by skills, title, or keywords..."
+                    >
+                </div>
+
+                <div class="filter-select-group">
+                    <select name="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="All" {% if selected_category == 'All' or not selected_category %}selected{% endif %}>All Categories</option>
+                        <option value="Technology &amp; Software Development" {% if selected_category == 'Technology & Software Development' %}selected{% endif %}>Technology &amp; Software</option>
+                        <option value="Engineering &amp; Innovation" {% if selected_category == 'Engineering & Innovation' %}selected{% endif %}>Engineering &amp; Hardware</option>
+                        <option value="Healthcare Accessibility" {% if selected_category == 'Healthcare Accessibility' %}selected{% endif %}>Healthcare &amp; Bio</option>
+                        <option value="Public Infrastructure" {% if selected_category == 'Public Infrastructure' %}selected{% endif %}>Public Infrastructure</option>
+                        <option value="College &amp; Student Life" {% if selected_category == 'College & Student Life' %}selected{% endif %}>College &amp; Student Life</option>
+                        <option value="Education &amp; Learning" {% if selected_category == 'Education & Learning' %}selected{% endif %}>Education &amp; Skilling</option>
+                    </select>
+
+                    <select name="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="All" {% if selected_status == 'All' or not selected_status %}selected{% endif %}>All Statuses</option>
+                        <option value="Open" {% if selected_status == 'Open' %}selected{% endif %}>Open</option>
+                        <option value="In Progress" {% if selected_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Resolved" {% if selected_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-secondary">Filter</button>
+                    {% if search_query or (selected_category and selected_category != 'All') or (selected_status and selected_status != 'All') %}
+                    <a href="{{ url_for('help_network_page') }}" class="btn btn-outline" title="Clear all filters">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        {% if requests %}
+        <div class="section-divider mt-2 mb-3">
+            <h3>Active Community Help Inquiries ({{ requests|length }})</h3>
+        </div>
+        <div class="help-requests-grid">
+            {% for req in requests %}
+            <div class="help-request-card">
+                <div class="req-header">
+                    <span class="category-pill">{{ req.category or 'General Innovation' }}</span>
+                    <div class="badge-group">
+                        <span class="badge badge-{{ 'danger' if req.urgency == 'Critical' else 'warning' if req.urgency == 'High' else 'info' }}">
+                            {{ req.urgency }} Urgency
+                        </span>
+                        <span class="status-badge status-{{ req.status|lower|replace(' ', '-') }}">
+                            {{ req.status }}
+                        </span>
+                    </div>
+                </div>
+
+                <h4 class="req-title">{{ req.title }}</h4>
+                <p class="req-desc">{{ req.description }}</p>
+
+                <div class="req-skills-box">
+                    <span class="skills-label">Skills &amp; Expertise Needed:</span>
+                    <div class="skills-tags">
+                        {% for skill in req.skills_needed.split(',') %}
+                        <span class="skill-tag">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if req.problem_id %}
+                <div class="req-problem-link">
+                    Linked Problem: <a href="{{ url_for('problem_details_page', problem_id=req.problem_id) }}">View Challenge #{{ req.problem_id }} &rarr;</a>
+                </div>
+                {% endif %}
+
+                <!-- Actual Recorded Assistance Offers -->
+                {% set matching_interests = [] %}
+                {% if interests %}
+                    {% for it in interests %}
+                        {% if it.help_request_id == req.id %}
+                            {% set _ = matching_interests.append(it) %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if matching_interests %}
+                <div class="assistance-offers-block mt-3">
+                    <span class="offers-header">👥 Recorded Assistance Offers ({{ matching_interests|length }}):</span>
+                    {% for it in matching_interests %}
+                    <div class="offer-item">
+                        <strong>{{ it.helper_name }}</strong> ({{ it.skills }}):
+                        <em>"{{ it.message }}"</em>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="req-footer mt-3">
+                    <div class="lead-info">
+                        <span class="contact-lbl">Lead:</span>
+                        <strong>{{ req.contact_name or "Project Coordinator" }}</strong>
+                        <span class="text-muted">({{ req.contact_info }})</span>
+                    </div>
+
+                    <div class="req-actions-bar">
+                        <!-- Offer Assistance Button -->
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openOfferHelpModal({{ req.id }}, '{{ req.title|escape }}')">
+                            Offer Assistance &rarr;
+                        </button>
+
+                        <!-- Lifecycle Status Update Dropdown Form -->
+                        <form method="POST" action="{{ url_for('update_help_status_action') }}" class="status-change-inline">
+                            <input type="hidden" name="request_id" value="{{ req.id }}">
+                            <select name="status" class="status-quick-select" onchange="this.form.submit()" title="Update Lifecycle Status">
+                                <option value="Open" {% if req.status == 'Open' %}selected{% endif %}>Status: Open</option>
+                                <option value="In Progress" {% if req.status == 'In Progress' %}selected{% endif %}>Status: In Progress</option>
+                                <option value="Resolved" {% if req.status == 'Resolved' %}selected{% endif %}>Status: Resolved</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🤝</div>
+            <h3>No matching help inquiries found</h3>
+            <p>Try resetting search filters, or be the first innovator to publish a help request!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB 2: Post Help Request Form -->
+    <div id="tab-postRequest" class="tab-content" style="display: none;">
+        <div class="form-card max-width-750">
+            <div class="form-section-title">
+                <span class="num-indicator">📝</span>
+                <div>
+                    <h3>Publish an Implementation Help Request</h3>
+                    <p class="section-hint">Clearly specify the exact technical, CAD, sensor, or coding skills needed.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('create_help_request_action') }}">
+                <div class="form-group">
+                    <label for="reqTitle" class="form-label">Request Title <span class="required-star">*</span></label>
+                    <input type="text" id="reqTitle" name="title" class="form-control" placeholder="e.g., Need Mechanical Engineer with 3D CAD experience to refine snap-on laptop bumper clips" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="reqCategory" class="form-label">Category / Domain <span class="required-star">*</span></label>
+                        <select id="reqCategory" name="category" class="form-select" required>
+                            <option value="Technology &amp; Software Development">Technology &amp; Software Development</option>
+                            <option value="Engineering &amp; Innovation" selected>Engineering &amp; Hardware Innovation</option>
+                            <option value="Healthcare Accessibility">Healthcare Accessibility</option>
+                            <option value="Public Infrastructure">Public Infrastructure</option>
+                            <option value="College &amp; Student Life">College &amp; Student Life</option>
+                            <option value="Environment &amp; Sustainability">Environment &amp; Sustainability</option>
+                            <option value="Education &amp; Learning">Education &amp; Learning</option>
+                            <option value="Community Problems">Community Problems</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="reqUrgency" class="form-label">Urgency Level</label>
+                        <select id="reqUrgency" name="urgency" class="form-select">
+                            <option value="Normal">Normal</option>
+                            <option value="High" selected>High (Impacting active test)</option>
+                            <option value="Critical">Critical (Immediate deadline / emergency)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reqProblemId" class="form-label">Related Registered Problem (Optional)</label>
+                    <select id="reqProblemId" name="problem_id" class="form-select">
+                        <option value="">None / General Inquiry</option>
+                        {% for p in all_problems %}
+                        <option value="{{ p.id }}">#{{ p.id }}: {{ p.title[:60] }}...</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reqSkills" class="form-label">Skills &amp; Expertise Needed <span class="required-star">*</span></label>
+                    <input type="text" id="reqSkills" name="skills_needed" class="form-control" placeholder="e.g., SolidWorks, Parametric CAD, 3D Printing, Mechanical Stress Analysis" required>
+                    <div class="form-hint">Comma-separated list of required technical proficiencies.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reqDesc" class="form-label">Detailed Request Description <span class="required-star">*</span></label>
+                    <textarea id="reqDesc" name="description" class="form-textarea" rows="4" placeholder="Describe the specific roadblock: What has been tried? What files/tools are involved? How many hours will the helper need to commit?" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="contactName" class="form-label">Contact Person Name <span class="required-star">*</span></label>
+                        <input type="text" id="contactName" name="contact_name" class="form-control" placeholder="e.g., Prof. K. Sharma" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="contactInfo" class="form-label">Contact Email or Phone <span class="required-star">*</span></label>
+                        <input type="text" id="contactInfo" name="contact_info" class="form-control" placeholder="e.g., makerlab.lead@engineering.edu" required>
+                    </div>
+                </div>
+
+                <div class="form-actions mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Publish Help Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 3: Helpers Roster -->
+    <div id="tab-helpersDirectory" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <div>
+                <h3>Volunteer Solvers &amp; Domain Mentors Directory</h3>
+                <p>Students, engineers, and researchers available to assist on real-world community and technical challenges.</p>
+            </div>
+        </div>
+
+        {% if helpers %}
+        <div class="helpers-grid">
+            {% for h in helpers %}
+            <div class="helper-card">
+                <div class="helper-header">
+                    <div class="helper-avatar">
+                        {{ h.name[:2]|upper }}
+                    </div>
+                    <div>
+                        <h4 class="helper-name">{{ h.name }}</h4>
+                        <span class="category-pill">{{ h.category or 'Technology' }}</span>
+                    </div>
+                </div>
+
+                <div class="helper-skills-block">
+                    <strong>Expertise &amp; Skills:</strong>
+                    <p>{{ h.skills }}</p>
+                </div>
+
+                {% if h.description %}
+                <p class="helper-about">{{ h.description }}</p>
+                {% endif %}
+
+                <div class="helper-footer">
+                    <span class="availability-tag">🕒 {{ h.availability or 'Available' }}</span>
+                    {% if h.contact %}
+                    <span class="helper-contact">📧 {{ h.contact }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>No registered helpers yet</h3>
+            <p>Be the first innovator to join our standing solver roster!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB 4: Register as Helper Form -->
+    <div id="tab-registerHelper" class="tab-content" style="display: none;">
+        <div class="form-card max-width-750">
+            <div class="form-section-title">
+                <span class="num-indicator">🌟</span>
+                <div>
+                    <h3>Join as a Volunteer Solver / Mentor</h3>
+                    <p class="section-hint">Put your skills to work on verified challenges and build a track record of tested impact.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('register_helper_action') }}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="helperName" class="form-label">Full Name / Display Name <span class="required-star">*</span></label>
+                        <input type="text" id="helperName" name="name" class="form-control" placeholder="e.g., Alex Morgan" required>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="helperContact" class="form-label">Email or GitHub/LinkedIn URL <span class="required-star">*</span></label>
+                        <input type="text" id="helperContact" name="contact" class="form-control" placeholder="e.g., alex.dev@engineering.edu" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="helperCat" class="form-label">Primary Domain Expertise</label>
+                        <select id="helperCat" name="category" class="form-select">
+                            <option value="Technology &amp; Software">Technology &amp; Software Development</option>
+                            <option value="Engineering &amp; Innovation" selected>Engineering &amp; Materials Design</option>
+                            <option value="Civil &amp; Infrastructure">Civil &amp; Municipal Infrastructure</option>
+                            <option value="Environment &amp; Clean Energy">Environmental &amp; Clean Energy</option>
+                            <option value="Healthcare &amp; Bio-Eng">Healthcare &amp; Biomedical Telemetry</option>
+                            <option value="Education &amp; Skilling">Education &amp; Assistive Tech</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="helperAvail" class="form-label">Estimated Availability</label>
+                        <input type="text" id="helperAvail" name="availability" class="form-control" placeholder="e.g., 3-5 hrs/week, Weekends">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="helperSkills" class="form-label">Skills &amp; Technologies <span class="required-star">*</span></label>
+                    <input type="text" id="helperSkills" name="skills" class="form-control" placeholder="e.g., Python, Flask, CAD (SolidWorks), 3D Printing, ESP32, Materials Testing" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="helperDesc" class="form-label">Brief Background / Bio</label>
+                    <textarea id="helperDesc" name="description" class="form-textarea" rows="3" placeholder="Briefly introduce your background, past projects, or academic focus."></textarea>
+                </div>
+
+                <div class="form-actions mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Join Standing Solver Roster</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal to Record Offer of Assistance -->
+<div id="offerHelpModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Offer Assistance to Project Lead</h3>
+            <button type="button" class="close-modal" onclick="closeOfferHelpModal()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('express_help_interest_action') }}">
+            <input type="hidden" id="modalHelpRequestId" name="help_request_id" value="">
+
+            <div class="mb-3">
+                <span class="text-muted">Target Inquiry:</span>
+                <strong id="modalRequestTitleDisplay" class="d-block text-primary"></strong>
+            </div>
+
+            <div class="form-group">
+                <label for="modalHelperName" class="form-label">Your Name <span class="required-star">*</span></label>
+                <input type="text" id="modalHelperName" name="helper_name" class="form-control" placeholder="e.g., Vikramaditya Roy" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modalHelperEmail" class="form-label">Your Email <span class="required-star">*</span></label>
+                <input type="email" id="modalHelperEmail" name="helper_email" class="form-control" placeholder="e.g., vikram.cad@engineering.edu" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modalHelperSkills" class="form-label">Relevant Skills You Offer <span class="required-star">*</span></label>
+                <input type="text" id="modalHelperSkills" name="skills" class="form-control" placeholder="e.g., SolidWorks CAD, Parametric Modeling, 3D Printing" required>
+            </div>
+
+            <div class="form-group">
+                <label for="modalHelperMessage" class="form-label">Message / How You Can Help <span class="required-star">*</span></label>
+                <textarea id="modalHelperMessage" name="message" class="form-textarea" rows="3" placeholder="I have 3 years of CAD experience and can model the bumper latches in 3 days." required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeOfferHelpModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Assistance Offer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchNetworkTab(tabName, btnElement) {
+    document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    
+    const target = document.getElementById("tab-" + tabName);
+    if (target) target.style.display = "block";
+    if (btnElement) btnElement.classList.add("active");
+}
+
+function openOfferHelpModal(reqId, reqTitle) {
+    document.getElementById("modalHelpRequestId").value = reqId;
+    document.getElementById("modalRequestTitleDisplay").textContent = reqTitle;
+    document.getElementById("offerHelpModal").style.display = "flex";
+}
+
+function closeOfferHelpModal() {
+    document.getElementById("offerHelpModal").style.display = "none";
+}
+
+// Check URL hash on page load
+window.addEventListener("DOMContentLoaded", function () {
+    const hash = window.location.hash;
+    if (hash === "#postRequest" || hash === "#post-request") {
+        switchNetworkTab('postRequest', document.getElementById("tabBtnPost"));
+    } else if (hash === "#helpersDirectory") {
+        switchNetworkTab('helpersDirectory', document.getElementById("tabBtnRoster"));
+    } else if (hash === "#registerHelper" || hash === "#register-helper") {
+        switchNetworkTab('registerHelper', document.getElementById("tabBtnRegister"));
+    }
+});
+</script>
+{% endblock %}

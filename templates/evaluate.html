@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}Solution Feasibility & Impact Calculator | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <span class="section-badge">Decision Support Framework &bull; MCDA Engine</span>
+        <h1 class="page-title">Solution Feasibility &amp; Impact Analysis</h1>
+        <p class="page-subtitle">
+            Evaluate any engineering or community proposal against 6 weighted criteria using transparent Multi-Criteria Decision Analysis (MCDA). Understand trade-offs, identify bottlenecks, and calculate an objective feasibility index.
+        </p>
+    </div>
+
+    <div class="eval-layout">
+        <!-- Interactive Sliders Form -->
+        <div class="eval-form-card">
+            <div class="eval-form-header">
+                <h3>Criteria Parameter Sliders</h3>
+                <span class="text-muted">Adjust values (1-10) to recalculate score live</span>
+            </div>
+
+            <form id="feasibilityForm" method="POST" action="{{ url_for('evaluate_action') }}">
+                {% if problem_id %}
+                <input type="hidden" name="problem_id" value="{{ problem_id }}">
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="evalTitle" class="form-label">Solution Proposal Title</label>
+                    <input 
+                        type="text" 
+                        id="evalTitle" 
+                        name="solution_title" 
+                        class="form-control" 
+                        value="{{ solution_title or 'Proposed Innovation Initiative' }}"
+                        required
+                    >
+                    <div class="form-hint">The innovation concept or engineering initiative being assessed.</div>
+                </div>
+
+                <!-- Criterion 1: Benefit & Impact -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="benefitRange">
+                            <strong>1. Expected Benefit &amp; Social Impact</strong>
+                            <span class="weight-badge">Weight: 25% (Max 25 pts)</span>
+                        </label>
+                        <span class="slider-value" id="benefitVal">{{ initial_scores.expected_benefit|default(8)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="benefitRange" 
+                        name="expected_benefit" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.expected_benefit|default(8) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (Marginal)</span>
+                        <span>5 (Moderate Relief)</span>
+                        <span>10 (Transformative Relief)</span>
+                    </div>
+                </div>
+
+                <!-- Criterion 2: Tech Feasibility -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="techRange">
+                            <strong>2. Technical Feasibility &amp; Readiness</strong>
+                            <span class="weight-badge">Weight: 20% (Max 20 pts)</span>
+                        </label>
+                        <span class="slider-value" id="techVal">{{ initial_scores.technical_feasibility|default(7)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="techRange" 
+                        name="technical_feasibility" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.technical_feasibility|default(7) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (Unproven / Complex)</span>
+                        <span>5 (Standard Tools / CAD)</span>
+                        <span>10 (Turnkey / Proven Tech)</span>
+                    </div>
+                </div>
+
+                <!-- Criterion 3: Cost Fit -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="costRange">
+                            <strong>3. Cost Fit &amp; Budget Viability</strong>
+                            <span class="weight-badge">Weight: 15% (Max 15 pts)</span>
+                        </label>
+                        <span class="slider-value" id="costVal">{{ initial_scores.cost_fit|default(8)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="costRange" 
+                        name="cost_fit" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.cost_fit|default(8) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (Prohibitive Cost)</span>
+                        <span>5 (Moderate / Manageable)</span>
+                        <span>10 (Zero / Open Source)</span>
+                    </div>
+                </div>
+
+                <!-- Criterion 4: Implementation Time -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="timeRange">
+                            <strong>4. Implementation Speed &amp; Timeline</strong>
+                            <span class="weight-badge">Weight: 15% (Max 15 pts)</span>
+                        </label>
+                        <span class="slider-value" id="timeVal">{{ initial_scores.implementation_time|default(8)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="timeRange" 
+                        name="implementation_time" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.implementation_time|default(8) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (&gt; 6 Months)</span>
+                        <span>5 (4-8 Weeks)</span>
+                        <span>10 (&lt; 2 Weeks Pilot)</span>
+                    </div>
+                </div>
+
+                <!-- Criterion 5: Resource Availability -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="resourceRange">
+                            <strong>5. Resource &amp; Skills Availability</strong>
+                            <span class="weight-badge">Weight: 15% (Max 15 pts)</span>
+                        </label>
+                        <span class="slider-value" id="resourceVal">{{ initial_scores.resource_availability|default(7)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="resourceRange" 
+                        name="resource_availability" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.resource_availability|default(7) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (Scarce / Specialty)</span>
+                        <span>5 (Partially Accessible)</span>
+                        <span>10 (Readily Available)</span>
+                    </div>
+                </div>
+
+                <!-- Criterion 6: Scalability -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label for="scaleRange">
+                            <strong>6. Scalability &amp; Replicability</strong>
+                            <span class="weight-badge">Weight: 10% (Max 10 pts)</span>
+                        </label>
+                        <span class="slider-value" id="scaleVal">{{ initial_scores.scalability|default(8)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input" 
+                        id="scaleRange" 
+                        name="scalability" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.scalability|default(8) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (One-off Custom Fix)</span>
+                        <span>5 (Campus/Institutional)</span>
+                        <span>10 (Universal / Global)</span>
+                    </div>
+                </div>
+
+                <!-- Risk Penalty -->
+                <div class="slider-group risk-slider-group">
+                    <div class="slider-header">
+                        <label for="riskRange">
+                            <strong class="text-danger">⚠️ Risk &amp; Uncertainty Penalty</strong>
+                            <span class="penalty-badge">Deduction: Up to -13.5 pts</span>
+                        </label>
+                        <span class="slider-value text-danger" id="riskVal">{{ initial_scores.risk_level|default(3)|int }}</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        class="slider-input slider-danger" 
+                        id="riskRange" 
+                        name="risk_level" 
+                        min="1" 
+                        max="10" 
+                        step="1" 
+                        value="{{ initial_scores.risk_level|default(3) }}"
+                        oninput="updateScoreLive()"
+                    >
+                    <div class="slider-labels">
+                        <span>1 (Minimal Risk)</span>
+                        <span>5 (Moderate Uncertainty)</span>
+                        <span>10 (Severe Critical Risk)</span>
+                    </div>
+                </div>
+
+                <div class="form-actions mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Save Evaluation to Database
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="resetToDefaults()">
+                        Reset Defaults
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Evaluation Results Display Card -->
+        <div class="eval-result-card" id="resultCard">
+            <div class="result-score-block">
+                <div class="gauge-wrap">
+                    <div class="score-circle">
+                        <span class="big-score" id="displayScore">
+                            {{ evaluation.overall_score|default(79.5) }}
+                        </span>
+                        <span class="score-max">/ 100</span>
+                    </div>
+                </div>
+
+                <div class="tier-info">
+                    <span class="tier-badge" id="displayTier">
+                        {{ evaluation.tier|default('High Feasibility & High Impact') }}
+                    </span>
+                    <p class="score-summary" id="displaySummary">
+                        Solid composite score calculated dynamically based on transparent MCDA weights.
+                    </p>
+                    <div class="mt-2">
+                        <span class="difficulty-pill" id="displayDifficulty">
+                            Estimated Implementation Complexity: <strong>{{ evaluation.difficulty_estimate|default('Medium') }}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer Notice -->
+            <div class="alert alert-info py-2 px-3 mt-3">
+                <small><strong>Decision Support Notice:</strong> This score is an algorithmic estimate calculated using documented Multi-Criteria Decision Analysis rules. It serves as a prioritization guide, not a guaranteed real-world outcome.</small>
+            </div>
+
+            <!-- Visual Radar Chart -->
+            <div class="eval-chart-box mt-3">
+                <canvas id="evalRadarChart" height="220"></canvas>
+            </div>
+
+            <!-- Breakdown Points List -->
+            <div class="breakdown-list" id="breakdownContainer">
+                <h4>Criteria Points Breakdown</h4>
+                {% for key, item in evaluation.criteria_breakdown.items() %}
+                <div class="breakdown-row">
+                    <div class="breakdown-meta">
+                        <span class="b-name">{{ item.name }} ({{ item.weight_percent }}%)</span>
+                        <span class="b-pts">{{ item.points_earned }} / {{ item.max_points }} pts</span>
+                    </div>
+                    <div class="meter-bar">
+                        <div class="meter-fill" style="width: {{ (item.points_earned / item.max_points * 100)|round }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Qualitative Analysis Factors -->
+            <div class="qualitative-factors mt-4">
+                <div class="factor-group">
+                    <h5 class="text-success">✅ Identified Strengths</h5>
+                    <ul class="factor-list" id="positivesList">
+                        {% for pf in evaluation.positive_factors %}
+                        <li>{{ pf }}</li>
+                        {% else %}
+                        <li>Balanced operational parameters across technical categories.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="factor-group mt-3">
+                    <h5 class="text-danger">⚠️ Potential Vulnerabilities &amp; Risks</h5>
+                    <ul class="factor-list" id="risksList">
+                        {% for rk in evaluation.risks %}
+                        <li>{{ rk }}</li>
+                        {% else %}
+                        <li>No acute bottlenecks identified under baseline criteria.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="factor-group mt-3">
+                    <h5 class="text-primary">💡 Actionable Improvement Suggestions</h5>
+                    <ul class="factor-list" id="recsList">
+                        {% for rec in evaluation.recommendations %}
+                        <li>{{ rec }}</li>
+                        {% else %}
+                        <li>Build a rapid 14-day minimal viable prototype (MVP) to test critical assumptions before scaling.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let evalRadarInstance = null;
+
+function calculateScoreClient(benefit, tech, cost, time, resource, scale, risk) {
+    const weights = {
+        benefit: { max: 25.0, val: benefit },
+        tech: { max: 20.0, val: tech },
+        cost: { max: 15.0, val: cost },
+        time: { max: 15.0, val: time },
+        resource: { max: 15.0, val: resource },
+        scale: { max: 10.0, val: scale }
+    };
+
+    let baseScore = 0;
+    for (const k in weights) {
+        baseScore += (weights[k].val / 10.0) * weights[k].max;
+    }
+
+    const riskPenalty = (risk - 1.0) * 1.5;
+    const finalScore = Math.max(0, Math.min(100, Math.round((baseScore - riskPenalty) * 10) / 10));
+
+    let tier = "High Feasibility & High Impact";
+    let diff = "Low";
+    if (finalScore >= 80) {
+        tier = "High Feasibility & High Impact";
+        diff = tech >= 8 ? "Low" : "Medium";
+    } else if (finalScore >= 60) {
+        tier = "Viable with Targeted Modifications";
+        diff = "Medium";
+    } else if (finalScore >= 40) {
+        tier = "Conditional Viability / Moderate Risk";
+        diff = "High";
+    } else {
+        tier = "Low Viability under Current Parameters";
+        diff = "Critical Complexity";
+    }
+
+    return {
+        overall: finalScore,
+        tier: tier,
+        difficulty: diff,
+        weights: [
+            (benefit / 10) * 25,
+            (tech / 10) * 20,
+            (cost / 10) * 15,
+            (time / 10) * 15,
+            (resource / 10) * 15,
+            (scale / 10) * 10
+        ]
+    };
+}
+
+function updateScoreLive() {
+    const benefit = parseFloat(document.getElementById("benefitRange").value);
+    const tech = parseFloat(document.getElementById("techRange").value);
+    const cost = parseFloat(document.getElementById("costRange").value);
+    const time = parseFloat(document.getElementById("timeRange").value);
+    const resource = parseFloat(document.getElementById("resourceRange").value);
+    const scale = parseFloat(document.getElementById("scaleRange").value);
+    const risk = parseFloat(document.getElementById("riskRange").value);
+
+    document.getElementById("benefitVal").textContent = benefit;
+    document.getElementById("techVal").textContent = tech;
+    document.getElementById("costVal").textContent = cost;
+    document.getElementById("timeVal").textContent = time;
+    document.getElementById("resourceVal").textContent = resource;
+    document.getElementById("scaleVal").textContent = scale;
+    document.getElementById("riskVal").textContent = risk;
+
+    const res = calculateScoreClient(benefit, tech, cost, time, resource, scale, risk);
+
+    document.getElementById("displayScore").textContent = res.overall.toFixed(1);
+    document.getElementById("displayTier").textContent = res.tier;
+    document.getElementById("displayDifficulty").innerHTML = `Estimated Implementation Complexity: <strong>${res.difficulty}</strong>`;
+
+    if (evalRadarInstance) {
+        evalRadarInstance.data.datasets[0].data = res.weights;
+        evalRadarInstance.update();
+    }
+}
+
+function resetToDefaults() {
+    document.getElementById("benefitRange").value = 8;
+    document.getElementById("techRange").value = 7;
+    document.getElementById("costRange").value = 8;
+    document.getElementById("timeRange").value = 8;
+    document.getElementById("resourceRange").value = 7;
+    document.getElementById("scaleRange").value = 8;
+    document.getElementById("riskRange").value = 3;
+    updateScoreLive();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const radarCtx = document.getElementById("evalRadarChart").getContext("2d");
+    const initialRes = calculateScoreClient(
+        parseFloat(document.getElementById("benefitRange").value),
+        parseFloat(document.getElementById("techRange").value),
+        parseFloat(document.getElementById("costRange").value),
+        parseFloat(document.getElementById("timeRange").value),
+        parseFloat(document.getElementById("resourceRange").value),
+        parseFloat(document.getElementById("scaleRange").value),
+        parseFloat(document.getElementById("riskRange").value)
+    );
+
+    evalRadarInstance = new Chart(radarCtx, {
+        type: "radar",
+        data: {
+            labels: ["Impact (25)", "Feasibility (20)", "Cost (15)", "Speed (15)", "Resources (15)", "Scalability (10)"],
+            datasets: [{
+                label: "Points Earned",
+                data: initialRes.weights,
+                fill: true,
+                backgroundColor: "rgba(13, 148, 136, 0.25)",
+                borderColor: "#0d9488",
+                pointBackgroundColor: "#0f172a",
+                pointBorderColor: "#fff",
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: "#e2e8f0" },
+                    grid: { color: "#e2e8f0" },
+                    pointLabels: { font: { family: "Plus Jakarta Sans", size: 10, weight: 600 } },
+                    suggestedMin: 0,
+                    suggestedMax: 25
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

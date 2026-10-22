@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}About IMPACT LAB | Architecture &amp; Methodology{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header text-center">
+        <span class="section-badge">ABOUT IMPACT LAB &bull; Architecture &amp; Methodology</span>
+        <h1 class="page-title">About IMPACT LAB</h1>
+        <p class="page-subtitle max-width-750 mx-auto">
+            From Ideas to Tested Impact. An open problem-solving infrastructure built to bridge the gap between theoretical proposals and verified real-world relief.
+        </p>
+    </div>
+
+    <!-- Core Philosophy Section -->
+    <div class="about-card mb-5">
+        <div class="about-section-header">
+            <span class="badge badge-primary">Foundational Principle</span>
+            <h2>Why IMPACT LAB Exists</h2>
+        </div>
+        <p class="lead-text">
+            Innovation competitions are often dominated by flashy presentations with no verification of whether the proposed solution actually fits real-world constraints or solves a genuine problem. Meanwhile, communities, NGOs, and municipal agencies face urgent operational bottlenecks that remain unsolved.
+        </p>
+        <p>
+            <strong>IMPACT LAB changes this paradigm:</strong> Every registered challenge requires explicit constraints, available resources, and verifiable definitions of success. Solutions are not ranked by subjective hype, but evaluated using mathematically grounded Multi-Criteria Decision Analysis (MCDA) and measured pilot testing.
+        </p>
+    </div>
+
+    <!-- 3 Core Workflows Architecture -->
+    <div class="section-divider mt-5">
+        <h2>Core Platform Modules &amp; Three Primary Workflows</h2>
+        <p>Engineered to handle diverse real-world situations with transparent backend logic.</p>
+    </div>
+
+    <div class="workflows-grid mb-5">
+        <div class="workflow-card">
+            <div class="workflow-tag tag-a">Workflow A</div>
+            <h3>Problem + Solution Idea</h3>
+            <p>
+                A user identifies a real friction point and has a concrete proposed idea. The system calculates an objective MCDA feasibility score across 6 weighted operational dimensions (impact, technical readiness, budget, deployment speed, resources, scalability) and deducts risk penalties.
+            </p>
+        </div>
+
+        <div class="workflow-card highlight-card">
+            <div class="workflow-tag tag-b">Workflow B</div>
+            <h3>Smart Solution Discovery (Problem but No Solution)</h3>
+            <p>
+                A user suffers from a severe bottleneck but lacks technical or design expertise. The system tokenizes their natural language input, filters stop words, extracts TF-IDF keyword weights, and matches them against proven solutions and engineering blueprints.
+            </p>
+        </div>
+
+        <div class="workflow-card">
+            <div class="workflow-tag tag-c">Workflow C</div>
+            <h3>Need Implementation Help</h3>
+            <p>
+                A project lead has a viable blueprint but faces an execution hurdle (e.g., Python scripting, 3D CAD modeling, embedded sensors, or volunteer logistics). They post a targeted help request, connecting directly with verified student and expert solvers.
+            </p>
+        </div>
+    </div>
+
+    <!-- Mathematical Formulation & Technical Depth -->
+    <div class="section-divider mt-5" id="scoring-model">
+        <h2>Technical Architecture &amp; Formulas (For Reviewers)</h2>
+        <p>Full algorithmic transparency without black-box obscurity.</p>
+    </div>
+
+    <div class="math-grid mb-5">
+        <!-- Math Box 1: TF-IDF & Cosine Similarity -->
+        <div class="math-card">
+            <div class="math-card-header">
+                <span class="math-icon">📐</span>
+                <div>
+                    <h4>1. NLP Vector Space Modeling &amp; Cosine Similarity</h4>
+                    <span class="math-sub">Solution Discovery Engine</span>
+                </div>
+            </div>
+            <p>
+                Input text is normalized to lowercase, stripped of punctuation, and filtered through an English stop-word lexicon. Term frequency and smooth inverse document frequency are calculated across all documents:
+            </p>
+            <div class="formula-box">
+                <code>IDF(t) = ln((1 + N) / (1 + DF(t))) + 1.0</code>
+            </div>
+            <p>
+                Vectors are L2-normalized: <code>||v|| = &radic;(&sum; w_i&sup2;)</code>. Semantic relevance between problem query vector <em>q</em> and solution vector <em>s</em> is computed using cosine similarity:
+            </p>
+            <div class="formula-box">
+                <code>cos(&theta;) = (q &bull; s) / (||q|| &times; ||s||)</code>
+            </div>
+            <p>
+                A hybrid score incorporates cosine similarity (45%), keyword set overlap (35%), shared keyword count bonus, and domain category alignment (15%).
+            </p>
+        </div>
+
+        <!-- Math Box 2: MCDA Feasibility Scoring -->
+        <div class="math-card">
+            <div class="math-card-header">
+                <span class="math-icon">⚖️</span>
+                <div>
+                    <h4>2. Multi-Criteria Decision Analysis (MCDA)</h4>
+                    <span class="math-sub">Feasibility &amp; Impact Engine</span>
+                </div>
+            </div>
+            <p>
+                Proposals are rated on a normalized 1-10 scale across 6 orthogonal operational criteria with established weights summing to 1.0:
+            </p>
+            <ul class="criteria-list-math">
+                <li><strong>Expected Benefit &amp; Impact:</strong> 25% (Max 25 pts)</li>
+                <li><strong>Technical Feasibility:</strong> 20% (Max 20 pts)</li>
+                <li><strong>Cost Fit / Budget Viability:</strong> 15% (Max 15 pts)</li>
+                <li><strong>Implementation Timeline:</strong> 15% (Max 15 pts)</li>
+                <li><strong>Resource &amp; Skill Access:</strong> 15% (Max 15 pts)</li>
+                <li><strong>Scalability &amp; Replicability:</strong> 10% (Max 10 pts)</li>
+            </ul>
+            <div class="formula-box">
+                <code>Base Score = &sum; (Rating_i / 10.0) &times; Max_Points_i</code>
+            </div>
+            <p>
+                An explicit risk penalty scales linearly with uncertainty:
+            </p>
+            <div class="formula-box">
+                <code>Risk Deduction = (Risk_Level - 1.0) &times; 1.5 pts</code>
+            </div>
+            <div class="formula-box highlight-formula">
+                <code>Overall Feasibility Index = max(0, min(100, Base Score - Risk Deduction))</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- Government & Civic Advisory Policy -->
+    <div class="about-card civic-policy-card mb-5">
+        <div class="about-section-header">
+            <span class="badge badge-warning">Civic &amp; Public Policy</span>
+            <h2>Government &amp; Civic Redress Integration</h2>
+        </div>
+        <p>
+            When a problem relates to public infrastructure (such as municipal waterlogging, broken roads, sanitation, or potable water), IMPACT LAB provides verified links to official statutory grievance portals:
+        </p>
+        <div class="portals-summary-tags">
+            <span class="tag-link">CPGRAMS (DARPG, Central Grievances)</span>
+            <span class="tag-link">Swachhata Urban (MoHUA, Municipal Redress)</span>
+            <span class="tag-link">Jal Jeevan Citizen Portal (Ministry of Jal Shakti)</span>
+            <span class="tag-link">National Cyber Crime Reporting Portal (MHA)</span>
+            <span class="tag-link">MyGov Innovation Platform (MeitY)</span>
+        </div>
+        <p class="policy-note mt-3">
+            <strong>Transparency Guarantee:</strong> IMPACT LAB does not file legal complaints or claim government affiliation. It equips citizens and student teams with awareness of official escalation pathways alongside community innovation prototyping.
+        </p>
+    </div>
+
+    <!-- Competition Alignment -->
+    <div class="about-card mb-5">
+        <div class="about-section-header">
+            <span class="badge badge-success">INNOTECH Readiness</span>
+            <h2>Technical Architecture &amp; Reliability</h2>
+        </div>
+        <div class="tech-stack-grid">
+            <div class="tech-cell">
+                <h4>Backend</h4>
+                <p>Python 3.11 with Flask framework. Modular clean architecture with clear separation of routes, database logic, and NLP algorithms.</p>
+            </div>
+            <div class="tech-cell">
+                <h4>Persistence</h4>
+                <p>ACID-compliant SQLite relational database (<code>impact_lab.db</code>) with automated schema migrations and foreign key constraints.</p>
+            </div>
+            <div class="tech-cell">
+                <h4>NLP &amp; Mathematics</h4>
+                <p>Pure Python vector space engine without heavy external binary dependencies. Runs 100% locally with zero external API failure modes.</p>
+            </div>
+            <div class="tech-cell">
+                <h4>Frontend &amp; UI/UX</h4>
+                <p>Sophisticated navy, off-white, and teal design system with semantic HTML5, responsive CSS grid/flexbox, and Chart.js dynamic visualizations.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

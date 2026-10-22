@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}{{ problem.title }} | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ url_for('home') }}">Home</a> &rsaquo;
+        <a href="{{ url_for('problems_page') }}">Explore Problems</a> &rsaquo;
+        <span>Challenge #{{ problem.id }}</span>
+    </nav>
+
+    <!-- Main Problem Overview Header Card -->
+    <div class="detail-header-card">
+        <div class="detail-top-row">
+            <div class="badges-row">
+                <span class="category-pill">{{ problem.category }}</span>
+                {% if problem.severity %}
+                <span class="severity-badge severity-{{ problem.severity|lower }}">
+                    {{ problem.severity }} Priority
+                </span>
+                {% endif %}
+                <span class="status-badge status-{{ problem.status|lower|replace(' ', '-') }}">
+                    {{ problem.status }}
+                </span>
+                <span class="meta-badge">Challenge #{{ problem.id }}</span>
+            </div>
+            <div class="action-buttons-group">
+                <a href="{{ url_for('discover_page') }}?problem_id={{ problem.id }}" class="btn btn-secondary btn-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Find Matching Solutions via NLP
+                </a>
+                <a href="#propose-solution-section" class="btn btn-primary btn-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    Propose Solution
+                </a>
+            </div>
+        </div>
+
+        <h1 class="detail-title">{{ problem.title }}</h1>
+
+        <div class="detail-meta-bar">
+            <div class="meta-cell">
+                <span class="meta-label">Submitted By</span>
+                <span class="meta-value">{{ problem.user_type }}</span>
+            </div>
+            {% if problem.location %}
+            <div class="meta-cell">
+                <span class="meta-label">Location / Community</span>
+                <span class="meta-value">{{ problem.location }}</span>
+            </div>
+            {% endif %}
+            <div class="meta-cell">
+                <span class="meta-label">Date Registered</span>
+                <span class="meta-value">{{ problem.created_at[:10] }}</span>
+            </div>
+        </div>
+
+        <div class="detail-body-block">
+            <h3>Problem Description</h3>
+            <p class="description-text">{{ problem.description }}</p>
+        </div>
+
+        <div class="detail-grid-two">
+            <div class="grid-box impact-box">
+                <h4>🎯 Expected Outcome &amp; Target Metric</h4>
+                <p>{{ problem.expected_impact or "Open-ended operational improvement." }}</p>
+            </div>
+            <div class="grid-box constraints-box">
+                <h4>⚠️ Operational &amp; Budget Constraints</h4>
+                <p>{{ problem.constraints or "No restrictive constraints specified by problem owner." }}</p>
+            </div>
+        </div>
+
+        {% if problem.available_resources %}
+        <div class="grid-box resources-box mt-3">
+            <h4>🛠️ Available Resources &amp; Equipment</h4>
+            <p>{{ problem.available_resources }}</p>
+        </div>
+        {% endif %}
+
+        {% if problem.proposed_solution %}
+        <div class="detail-body-block mt-3 bg-light-panel">
+            <h4>💡 Submitter's Initial Concept</h4>
+            <p class="italic-text">"{{ problem.proposed_solution }}"</p>
+            <div class="mt-2">
+                <a href="{{ url_for('evaluate_page') }}?title={{ problem.proposed_solution|urlencode }}&problem_id={{ problem.id }}" class="btn btn-outline btn-sm">
+                    Evaluate This Idea's Feasibility (MCDA) &rarr;
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Government & Civic Infrastructure Advisory (Contextual) -->
+    {% if gov_data.is_civic_related %}
+    <div class="gov-advisory-banner">
+        <div class="gov-header">
+            <span class="gov-icon">🏛️</span>
+            <div>
+                <h3 class="gov-title">Government &amp; Civic Redress Portals</h3>
+                <span class="gov-subtitle">Official Public Redress Mechanisms &bull; Citizen Awareness</span>
+            </div>
+        </div>
+        <p class="gov-notice-text">
+            {{ gov_data.advisory_notice }}
+        </p>
+
+        <div class="gov-portals-grid">
+            {% for portal in gov_data.portals %}
+            <div class="portal-card">
+                <div class="portal-card-header">
+                    <h4>{{ portal.name }}</h4>
+                    <span class="portal-authority">{{ portal.authority }}</span>
+                </div>
+                <p class="portal-desc">{{ portal.description }}</p>
+                <a href="{{ portal.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm portal-link">
+                    Open Official Portal &nearr;
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Solutions Section -->
+    <div class="section-divider">
+        <h2>Proposed Solutions &amp; Field Tests ({{ solutions|length }})</h2>
+        <p>Compare engineered proposals, evaluate algorithmic feasibility scores, or view documented pilot evidence.</p>
+    </div>
+
+    {% if solutions %}
+    <div class="solutions-list">
+        {% for sol in solutions %}
+        <div class="solution-card">
+            <div class="solution-header">
+                <div>
+                    <span class="solution-author">Proposed by: <strong>{{ sol.author_name }}</strong> ({{ sol.author_type }})</span>
+                    <h3 class="solution-title">{{ sol.title }}</h3>
+                </div>
+                <div class="solution-status-wrap">
+                    <span class="status-badge status-{{ sol.status|lower|replace(' ', '-') }}">
+                        {{ sol.status }}
+                    </span>
+                </div>
+            </div>
+
+            <p class="solution-desc">{{ sol.description }}</p>
+
+            <div class="solution-specs-grid">
+                <div class="spec-item">
+                    <span class="spec-label">Technical Complexity</span>
+                    <span class="spec-value">{{ sol.difficulty }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Estimated Cost</span>
+                    <span class="spec-value">{{ sol.estimated_cost }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Time to Deploy</span>
+                    <span class="spec-value">{{ sol.time_weeks }} weeks</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Key Resources</span>
+                    <span class="spec-value">{{ sol.required_resources }}</span>
+                </div>
+            </div>
+
+            {% if sol.expected_benefit %}
+            <div class="spec-benefit mt-2">
+                <strong>Expected Benefit:</strong> {{ sol.expected_benefit }}
+            </div>
+            {% endif %}
+
+            <!-- If Testing or Result Recorded: Show Measured Comparison -->
+            {% if sol.status in ['Testing', 'Result Recorded'] %}
+            <div class="test-result-box">
+                <div class="result-header">
+                    <span class="result-icon">📊</span>
+                    <h4>Field Test Outcome Tracking &amp; Evidence</h4>
+                </div>
+                <div class="result-grid">
+                    <div>
+                        <span class="result-lbl">Target Benchmark:</span>
+                        <p class="result-val">{{ sol.target_metric or "Target metric defined during proposal phase." }}</p>
+                    </div>
+                    <div>
+                        <span class="result-lbl">Measured Actual Result:</span>
+                        <p class="result-val actual-val">
+                            {{ sol.actual_result or "Testing in active field pilot; final metric pending validation." }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="solution-card-footer">
+                <a href="{{ url_for('evaluate_page') }}?title={{ sol.title|urlencode }}&problem_id={{ problem.id }}" class="btn btn-primary btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Calculate Feasibility Score
+                </a>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openUpdateStatusModal({{ sol.id }}, '{{ sol.status }}')">
+                    Update Progress &amp; Result
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💡</div>
+        <h3>No solutions proposed yet</h3>
+        <p>Be the first innovator to propose a technical, community, or low-cost solution for this problem!</p>
+    </div>
+    {% endif %}
+
+    <!-- Propose a Solution Form Section -->
+    <div id="propose-solution-section" class="form-card mt-5">
+        <div class="form-section-title">
+            <span class="num-indicator">+</span>
+            <div>
+                <h3>Propose an Alternative Solution</h3>
+                <p class="section-hint">Submit a concrete, actionable approach addressing the stated constraints.</p>
+            </div>
+        </div>
+
+        <form id="solutionForm" method="POST" action="{{ url_for('submit_solution_action') }}">
+            <input type="hidden" name="problem_id" value="{{ problem.id }}">
+
+            <div class="form-group">
+                <label for="solutionTitle" class="form-label">Solution Title <span class="required-star">*</span></label>
+                <input type="text" id="solutionTitle" name="title" class="form-control" placeholder="e.g., Modular Snap-On Corner Bumpers with Viscoelastic Dampers" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="authorName" class="form-label">Contributor / Lab Name <span class="required-star">*</span></label>
+                    <input type="text" id="authorName" name="author_name" class="form-control" placeholder="e.g., Advanced Materials Lab / Mechatronics Collective" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="authorType" class="form-label">Your Role / Profile</label>
+                    <select id="authorType" name="author_type" class="form-select">
+                        <option value="Independent Innovator" selected>Independent Innovator / Developer</option>
+                        <option value="Domain Engineer">Domain Engineer / Researcher</option>
+                        <option value="Community Member">Local Community Member</option>
+                        <option value="NGO Volunteer">NGO Volunteer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="solutionDescription" class="form-label">Explain Your Solution &amp; Methodology <span class="required-star">*</span></label>
+                <textarea id="solutionDescription" name="description" class="form-textarea" rows="4" placeholder="How does this solution work? What components are needed? How does it bypass the stated operational and budget constraints?" required></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="difficulty" class="form-label">Technical Complexity</label>
+                    <select id="difficulty" name="difficulty" class="form-select">
+                        <option value="Low">Low (Simple / Turnkey / No coding)</option>
+                        <option value="Medium" selected>Medium (Standard dev / 3D printing)</option>
+                        <option value="High">High (Specialized engineering)</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="estimatedCost" class="form-label">Estimated Cost</label>
+                    <select id="estimatedCost" name="estimated_cost" class="form-select">
+                        <option value="Zero / Free">Zero / Free (Open source)</option>
+                        <option value="Low (< ₹5,000)" selected>Low (&lt; ₹5,000)</option>
+                        <option value="Medium (₹5k - ₹25k)">Medium (₹5k - ₹25k)</option>
+                        <option value="High (> ₹25k)">High (&gt; ₹25k)</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="timeWeeks" class="form-label">Deployment Timeline</label>
+                    <input type="number" id="timeWeeks" name="time_weeks" class="form-control" value="3" min="1" max="52">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="requiredResources" class="form-label">Required Materials / Software / Tools</label>
+                <input type="text" id="requiredResources" name="required_resources" class="form-control" placeholder="e.g., TPU 3D filament, digital calipers, SolidWorks, viscoelastic foam">
+            </div>
+
+            <div class="form-group">
+                <label for="expectedBenefit" class="form-label">Expected Direct Benefit &amp; Target Metric</label>
+                <input type="text" id="expectedBenefit" name="expected_benefit" class="form-control" placeholder="e.g., Absorbs 85% of perpendicular drop shock from 1.2m heights">
+            </div>
+
+            <div class="form-actions mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">Submit Proposed Solution</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Linked Help Requests Section -->
+    <div class="section-divider mt-5">
+        <h2>Help Requests &amp; Volunteer Inquiries ({{ help_requests|length }})</h2>
+        <p>Specific skills or hardware equipment requested by the project lead to implement solutions for this challenge.</p>
+    </div>
+
+    {% if help_requests %}
+    <div class="help-requests-grid">
+        {% for req in help_requests %}
+        <div class="help-request-card">
+            <div class="req-header">
+                <span class="badge badge-warning">{{ req.urgency }} Urgency</span>
+                <span class="status-badge status-{{ req.status|lower }}">{{ req.status }}</span>
+            </div>
+            <h4>{{ req.title }}</h4>
+            <p>{{ req.description }}</p>
+            <div class="req-skills">
+                <strong>Skills Needed:</strong> {{ req.skills_needed }}
+            </div>
+            <div class="req-footer">
+                <span>Contact: {{ req.contact_name or "Project Lead" }}</span>
+                <a href="{{ url_for('help_network_page') }}?q={{ req.title|urlencode }}" class="btn btn-outline btn-sm">
+                    Offer Assistance &rarr;
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No open help requests currently posted for this challenge.</p>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{{ url_for('help_network_page') }}#postRequest" class="btn btn-outline btn-sm">
+            + Request Implementation Help for this Challenge
+        </a>
+    </div>
+</div>
+
+<!-- Modal to Update Solution Progress & Field Test Results -->
+<div id="statusModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Update Field Testing Status &amp; Result</h3>
+            <button type="button" class="close-modal" onclick="closeStatusModal()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('update_solution_status') }}">
+            <input type="hidden" id="modalSolutionId" name="solution_id" value="">
+            <input type="hidden" name="problem_id" value="{{ problem.id }}">
+
+            <div class="form-group">
+                <label for="modalStatus" class="form-label">Lifecycle Stage</label>
+                <select id="modalStatus" name="status" class="form-select">
+                    <option value="Proposed">Proposed</option>
+                    <option value="Selected">Selected for Pilot</option>
+                    <option value="Testing">Currently Testing in Field</option>
+                    <option value="Result Recorded">Result Recorded &amp; Validated</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="modalTarget" class="form-label">Target Benchmark</label>
+                <input type="text" id="modalTarget" name="target_metric" class="form-control" placeholder="e.g., Zero screen breakages from 1.2m drop test">
+            </div>
+
+            <div class="form-group">
+                <label for="modalActual" class="form-label">Measured Field Result</label>
+                <textarea id="modalActual" name="actual_result" class="form-textarea" rows="3" placeholder="Document what actually occurred during field testing. Include numerical measurements and test conditions."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeStatusModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Test Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openUpdateStatusModal(solutionId, currentStatus) {
+    document.getElementById("modalSolutionId").value = solutionId;
+    document.getElementById("modalStatus").value = currentStatus;
+    document.getElementById("statusModal").style.display = "flex";
+}
+function closeStatusModal() {
+    document.getElementById("statusModal").style.display = "none";
+}
+</script>
+{% endblock %}

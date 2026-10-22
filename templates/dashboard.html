@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+
+{% block title %}Impact Dashboard & Analytics | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container dashboard-page">
+    <div class="page-header">
+        <div class="header-left">
+            <span class="section-badge">Platform Analytics &bull; Live SQLite Database</span>
+            <h1 class="page-title">Impact Analytics Dashboard</h1>
+            <p class="page-subtitle">
+                Real-time operational metrics, category distributions, solution lifecycle tracking, and algorithmic feasibility evaluations calculated dynamically from database records.
+            </p>
+        </div>
+        <div class="header-right">
+            <a href="{{ url_for('submit_problem_page') }}" class="btn btn-primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Post New Problem
+            </a>
+            <a href="{{ url_for('discover_page') }}" class="btn btn-secondary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Run Discovery Engine
+            </a>
+        </div>
+    </div>
+
+    <!-- Executive Metric Cards (Computed from DB) -->
+    <div class="dashboard-kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap teal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.total_problems }}</span>
+                <span class="kpi-label">Total Problems Submitted</span>
+                <span class="kpi-subtext">Across 9 distinct innovation domains</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap navy">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.total_solutions }}</span>
+                <span class="kpi-label">Solutions Available</span>
+                <span class="kpi-subtext">Engineered proposals &amp; blueprints</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.open_problems }}</span>
+                <span class="kpi-label">Problems Currently Open</span>
+                <span class="kpi-subtext">Awaiting community solution proposals</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap amber">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.testing_problems }}</span>
+                <span class="kpi-label">Active Field Pilots</span>
+                <span class="kpi-subtext">Under experimental pilot testing</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap emerald">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.resolved_problems }}</span>
+                <span class="kpi-label">Problems Marked Resolved</span>
+                <span class="kpi-subtext">Documented &amp; outcome validated</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon-wrap purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="kpi-content">
+                <span class="kpi-value">{{ stats.average_feasibility_score }} <small>/100</small></span>
+                <span class="kpi-label">Avg. Feasibility Score</span>
+                <span class="kpi-subtext">Composite MCDA evaluation index</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Visualization Charts Grid -->
+    <div class="charts-two-col">
+        <!-- Chart 1: Problems by Category -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <h3>Problems by Domain Category</h3>
+                    <span class="chart-subtitle">Distribution of logged challenges across major focus areas</span>
+                </div>
+                <span class="badge badge-info">Real-time</span>
+            </div>
+            <div class="chart-canvas-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Problem Lifecycle Status -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <h3>Problem Lifecycle Status</h3>
+                    <span class="chart-subtitle">Breakdown by current operational resolution stage</span>
+                </div>
+                <span class="badge badge-info">Persistent</span>
+            </div>
+            <div class="chart-canvas-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-two-col mt-4">
+        <!-- Chart 3: Solution Complexity Distribution -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <h3>Solution Complexity &amp; Engineering Tier</h3>
+                    <span class="chart-subtitle">Technical difficulty levels of stored solution proposals</span>
+                </div>
+            </div>
+            <div class="chart-canvas-container">
+                <canvas id="difficultyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Feasibility Dimensions Overview -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <div>
+                    <h3>MCDA Evaluation Framework Weights</h3>
+                    <span class="chart-subtitle">Standard weight allocation across multi-criteria parameters</span>
+                </div>
+            </div>
+            <div class="chart-canvas-container">
+                <canvas id="mcdaRadarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Activity Tables Grid -->
+    <div class="activity-tables-grid mt-5">
+        <!-- Recent Problems Table -->
+        <div class="dashboard-table-card">
+            <div class="table-card-header">
+                <div class="header-titles">
+                    <h3>Recent Problem Submissions</h3>
+                    <span class="subtext">Latest challenges registered in SQLite</span>
+                </div>
+                <a href="{{ url_for('problems_page') }}" class="view-all-link">View All &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Problem Title</th>
+                            <th>Domain</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                            <th>Solutions</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in recent_problems %}
+                        <tr>
+                            <td><strong>#{{ p.id }}</strong></td>
+                            <td class="table-title-cell">
+                                <a href="{{ url_for('problem_details_page', problem_id=p.id) }}" class="title-link">
+                                    {{ p.title[:45] }}{% if p.title|length > 45 %}...{% endif %}
+                                </a>
+                            </td>
+                            <td><span class="category-pill">{{ p.category }}</span></td>
+                            <td>
+                                <span class="severity-badge severity-{{ (p.severity or 'Medium')|lower }}">
+                                    {{ p.severity or 'Medium' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ p.status|lower|replace(' ', '-') }}">
+                                    {{ p.status }}
+                                </span>
+                            </td>
+                            <td class="text-center">{{ p.solution_count }}</td>
+                            <td>
+                                <a href="{{ url_for('problem_details_page', problem_id=p.id) }}" class="btn btn-outline btn-xs">
+                                    Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Feasibility Evaluations Table -->
+        <div class="dashboard-table-card">
+            <div class="table-card-header">
+                <div class="header-titles">
+                    <h3>Recent Feasibility Assessments (MCDA)</h3>
+                    <span class="subtext">Algorithmic scoring calculations recorded in database</span>
+                </div>
+                <a href="{{ url_for('evaluate_page') }}" class="view-all-link">Open Evaluator &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Evaluation Target</th>
+                            <th>Score</th>
+                            <th>Tier Assessment</th>
+                            <th>Recorded On</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ev in recent_evaluations %}
+                        <tr>
+                            <td class="table-title-cell">
+                                <strong>{{ ev.solution_title[:40] }}{% if ev.solution_title|length > 40 %}...{% endif %}</strong>
+                                {% if ev.problem_title %}
+                                <div class="sub-problem-text">For: {{ ev.problem_title[:35] }}...</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="score-badge {% if ev.overall_score >= 80 %}score-high{% elif ev.overall_score >= 60 %}score-med{% else %}score-low{% endif %}">
+                                    {{ ev.overall_score }}/100
+                                </span>
+                            </td>
+                            <td>
+                                <span class="tier-text">
+                                    {% if ev.overall_score >= 80 %}High Viability{% elif ev.overall_score >= 60 %}Viable w/ Mod.{% else %}High Risk{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ ev.created_at[:10] }}</td>
+                            <td>
+                                <a href="{{ url_for('evaluate_page') }}?title={{ ev.solution_title|urlencode }}&problem_id={{ ev.problem_id }}" class="btn btn-outline btn-xs">
+                                    Recalculate
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Data Injection from Flask Backend
+    const categoriesData = {{ stats.categories_distribution | tojson }};
+    const statusData = {{ stats.status_distribution | tojson }};
+    const difficultyData = {{ stats.difficulty_distribution | tojson }};
+
+    // Color definitions aligned with Navy & Teal Design System
+    const navyTealPalette = [
+        '#0d9488', // Teal primary
+        '#0284c7', // Sky blue
+        '#0f172a', // Deep slate navy
+        '#059669', // Emerald
+        '#d97706', // Amber
+        '#7c3aed', // Purple
+        '#ec4899', // Pink
+        '#64748b', // Slate
+        '#14b8a6'  // Light teal
+    ];
+
+    // Chart 1: Category Distribution
+    const catLabels = categoriesData.map(d => d.category);
+    const catCounts = categoriesData.map(d => d.count);
+
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catCounts,
+                backgroundColor: navyTealPalette.slice(0, catLabels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 12, font: { family: 'Plus Jakarta Sans', size: 11 } }
+                }
+            },
+            cutout: '62%'
+        }
+    });
+
+    // Chart 2: Status Distribution
+    const statusLabels = Object.keys(statusData);
+    const statusCounts = Object.values(statusData);
+    const statusColors = {
+        'Open': '#0284c7',
+        'In Progress': '#d97706',
+        'Testing': '#0d9488',
+        'Resolved': '#059669'
+    };
+
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: statusLabels.map(s => statusColors[s] || '#64748b'),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 12, font: { family: 'Plus Jakarta Sans', size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Chart 3: Difficulty Distribution (Bar Chart)
+    const diffLabels = ['Low', 'Medium', 'High'];
+    const diffCounts = diffLabels.map(l => difficultyData[l] || 0);
+
+    const diffCtx = document.getElementById('difficultyChart').getContext('2d');
+    new Chart(diffCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Low (Turnkey/Simple)', 'Medium (Standard Dev)', 'High (Specialized/Complex)'],
+            datasets: [{
+                label: 'Solutions by Difficulty',
+                data: diffCounts,
+                backgroundColor: ['#059669', '#0d9488', '#d97706'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // Chart 4: MCDA Radar Framework Weights
+    const radarCtx = document.getElementById('mcdaRadarChart').getContext('2d');
+    new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+            labels: [
+                'Expected Impact (25%)',
+                'Tech Feasibility (20%)',
+                'Cost Fit (15%)',
+                'Deployment Speed (15%)',
+                'Resource Access (15%)',
+                'Scalability (10%)'
+            ],
+            datasets: [{
+                label: 'Criterion Max Points',
+                data: [25, 20, 15, 15, 15, 10],
+                fill: true,
+                backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                borderColor: '#0d9488',
+                pointBackgroundColor: '#0f172a',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#0d9488'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: '#e2e8f0' },
+                    grid: { color: '#e2e8f0' },
+                    pointLabels: { font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 } },
+                    suggestedMin: 0,
+                    suggestedMax: 25
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

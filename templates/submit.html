@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Submit a Problem | IMPACT LAB{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <span class="section-badge">Step 01 &bull; Problem Definition</span>
+        <h1 class="page-title">Submit a Real-World Problem</h1>
+        <p class="page-subtitle">
+            Articulate the challenge, the affected community, your operational constraints, available resources, and what quantifiable success looks like. Even if you do not have a solution idea yet, submitting a well-defined problem enables our solver community and discovery engine to recommend viable approaches.
+        </p>
+    </div>
+
+    <div class="form-layout">
+        <!-- Main Submission Form Card -->
+        <div class="form-card">
+            <form id="problemSubmitForm" method="POST" action="{{ url_for('submit_problem_action') }}" novalidate>
+                <!-- Section 1: Problem Overview -->
+                <div class="form-section-title">
+                    <span class="num-indicator">1</span>
+                    <div>
+                        <h3>Core Problem Definition</h3>
+                        <p class="section-hint">Provide clear, descriptive details regarding what is broken or constrained.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="problemTitle" class="form-label">
+                        Problem Title <span class="required-star">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="problemTitle" 
+                        name="title" 
+                        class="form-control" 
+                        placeholder="e.g., Frequent Laptop Screen &amp; Casing Damage from Accidental Drops in Maker Labs"
+                        minlength="5"
+                        maxlength="140"
+                        required
+                    >
+                    <div class="form-hint">A clear, descriptive title summarizing the root challenge (5-140 characters).</div>
+                    <div class="invalid-feedback" id="titleFeedback">Please enter a descriptive problem title (at least 5 characters).</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="category" class="form-label">
+                            Problem Domain / Category <span class="required-star">*</span>
+                        </label>
+                        <select id="category" name="category" class="form-select" required>
+                            <option value="" disabled selected>Select an innovation domain...</option>
+                            <option value="Technology &amp; Software Development">Technology &amp; Software Development</option>
+                            <option value="Engineering &amp; Innovation">Engineering &amp; Innovation (Hardware, Materials, Mechanical)</option>
+                            <option value="College &amp; Student Life">College &amp; Student Life (Campus, Transit, Hostels)</option>
+                            <option value="Environment &amp; Sustainability">Environment &amp; Sustainability (Clean Energy, Waste, Water)</option>
+                            <option value="Public Infrastructure">Public Infrastructure (Drainage, Roads, Utilities, Civic)</option>
+                            <option value="Healthcare Accessibility">Healthcare Accessibility (Rural Care, Medical Devices, Logistics)</option>
+                            <option value="Education &amp; Learning">Education &amp; Learning (STEM, Inclusivity, Skilling)</option>
+                            <option value="Community Problems">Community &amp; Social Problems</option>
+                            <option value="Government &amp; Civic Services">Government &amp; Civic Services</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a domain category.</div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="severity" class="form-label">
+                            Severity / Urgency Level <span class="required-star">*</span>
+                        </label>
+                        <select id="severity" name="severity" class="form-select" required>
+                            <option value="Low">Low — Minor bottleneck, long-term optimization</option>
+                            <option value="Medium" selected>Medium — Routine operational drag, affects daily workflow</option>
+                            <option value="High">High — Severe disruption, equipment risk, or student safety</option>
+                            <option value="Critical">Critical — Immediate safety risk, health emergency, or total stoppage</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="userType" class="form-label">
+                            Submitting As: <span class="required-star">*</span>
+                        </label>
+                        <select id="userType" name="user_type" class="form-select" required>
+                            <option value="Help Seeker" selected>Individual Student / Help Seeker</option>
+                            <option value="Academic / Research">Academic / Student Research Lab</option>
+                            <option value="Community Representative">Community Representative / RWA</option>
+                            <option value="NGO / Non-Profit">NGO / Non-Profit Coordinator</option>
+                            <option value="Small Business">Small Enterprise / Startup Team</option>
+                            <option value="Government / Municipal">Civic / Institutional Staff</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="location" class="form-label">
+                            Location or Affected Environment
+                        </label>
+                        <input 
+                            type="text" 
+                            id="location" 
+                            name="location" 
+                            class="form-control" 
+                            placeholder="e.g., University Maker Space, Sector 62, or Rural Clinic Block"
+                        >
+                        <div class="form-hint">Physical campus, city, district, or institution.</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="problemDescription" class="form-label">
+                        Detailed Problem Description <span class="required-star">*</span>
+                    </label>
+                    <textarea 
+                        id="problemDescription" 
+                        name="description" 
+                        class="form-textarea" 
+                        rows="5"
+                        placeholder="Contextualize the bottleneck: What specifically happens? Who is suffering or facing disruption? Under what environmental conditions? Why haven't generic solutions resolved it?"
+                        minlength="20"
+                        required
+                    ></textarea>
+                    <div class="form-hint">Include quantitative context, frequency, and real consequences (minimum 20 characters).</div>
+                    <div class="invalid-feedback">Please provide a detailed description (at least 20 characters).</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="keywords" class="form-label">
+                        Keywords &amp; Semantic Tags
+                    </label>
+                    <input 
+                        type="text" 
+                        id="keywords" 
+                        name="keywords" 
+                        class="form-control" 
+                        placeholder="e.g., laptop, accidental impacts, drops, shock absorption, protective design, materials, engineering"
+                    >
+                    <div class="form-hint">Comma-separated terms that empower our NLP TF-IDF matching engine.</div>
+                </div>
+
+                <!-- Section 2: Constraints & Expected Outcome -->
+                <div class="form-section-title mt-4">
+                    <span class="num-indicator">2</span>
+                    <div>
+                        <h3>Constraints, Resources &amp; Expected Outcome</h3>
+                        <p class="section-hint">Set the boundaries so solutions match real-world viability.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="expectedImpact" class="form-label">
+                        Expected Outcome / Definition of Success <span class="required-star">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="expectedImpact" 
+                        name="expected_impact" 
+                        class="form-control" 
+                        placeholder="e.g., Reduce drop-induced screen cracks by 85% from standard 1.2m heights without restricting airflow"
+                        required
+                    >
+                    <div class="form-hint">State what quantifiable or operational relief marks a successful solution.</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="constraints" class="form-label">
+                            Operational &amp; Budget Constraints
+                        </label>
+                        <textarea 
+                            id="constraints" 
+                            name="constraints" 
+                            class="form-textarea" 
+                            rows="3"
+                            placeholder="e.g., Fabrication budget strictly capped at ₹1,000 per unit; must operate without external continuous power."
+                        ></textarea>
+                        <div class="form-hint">Financial ceilings, technical hurdles, space limits, or legal boundaries.</div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="availableResources" class="form-label">
+                            Available Resources &amp; Equipment
+                        </label>
+                        <textarea 
+                            id="availableResources" 
+                            name="available_resources" 
+                            class="form-textarea" 
+                            rows="3"
+                            placeholder="e.g., Campus 3D printer (TPU filament), hand tools, 2 student volunteers (5 hrs/week)."
+                        ></textarea>
+                        <div class="form-hint">Hardware, staff time, facilities, or materials already on hand.</div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Existing Solution Idea (Optional) -->
+                <div class="form-section-title mt-4">
+                    <span class="num-indicator">3</span>
+                    <div>
+                        <h3>Solution Idea (Optional)</h3>
+                        <p class="section-hint">Have an idea? We'll calculate its feasibility score. Don't have one? Leave empty!</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="proposedSolution" class="form-label">
+                        Do you already have a solution concept in mind?
+                    </label>
+                    <textarea 
+                        id="proposedSolution" 
+                        name="proposed_solution" 
+                        class="form-textarea" 
+                        rows="3"
+                        placeholder="Describe your initial concept if you have one (e.g., 'Modular snap-on corner bumpers with viscoelastic foam padding'). If you have no solution yet, leave this blank — our Discovery Engine and solver community will recommend options!"
+                    ></textarea>
+                    <div class="form-hint">If provided, you can immediately evaluate this idea using our MCDA Feasibility Calculator upon submission.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactEmail" class="form-label">
+                        Contact Email (Optional for notifications)
+                    </label>
+                    <input 
+                        type="email" 
+                        id="contactEmail" 
+                        name="contact_email" 
+                        class="form-control" 
+                        placeholder="you@domain.com"
+                    >
+                    <div class="form-hint">Your email is kept confidential and only used when solvers propose solutions or offer assistance.</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Register Problem in IMPACT LAB
+                    </button>
+                    <a href="{{ url_for('problems_page') }}" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar Guidelines -->
+        <div class="sidebar-tips">
+            <div class="tip-card">
+                <div class="tip-header">
+                    <span class="tip-icon">🎯</span>
+                    <h4>How to Write an INNOTECH-Ready Problem</h4>
+                </div>
+                <ul class="tip-list">
+                    <li><strong>Isolate root causes:</strong> Rather than "laptops keep breaking", pinpoint "screen corner hinge fractures caused by 1.2m workbench drops in maker spaces".</li>
+                    <li><strong>Set realistic constraints:</strong> Clearly stating whether your budget is ₹500 or ₹20,000 prevents solvers from proposing unaffordable overkill.</li>
+                    <li><strong>Define measurable success:</strong> Numerical targets (e.g. "survive 1.2m drop", "maintain 2-8°C for 48 hrs") allow objective testing.</li>
+                    <li><strong>No solution needed:</strong> Over half of high-impact innovations begin with problem owners who simply documented a critical friction point.</li>
+                </ul>
+            </div>
+
+            <div class="tip-card civic-alert-card">
+                <div class="tip-header">
+                    <span class="tip-icon">🏛️</span>
+                    <h4>Public &amp; Municipal Issues</h4>
+                </div>
+                <p>If your problem relates to municipal roads, drainage, water supply, or cyber fraud, IMPACT LAB provides verified links to official government redress portals (CPGRAMS, Swachhata, MyGov) alongside community prototyping options.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
